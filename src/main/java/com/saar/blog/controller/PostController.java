@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.saar.blog.payloads.PostDto;
@@ -48,14 +49,12 @@ public class PostController {
 		return new ResponseEntity<List<PostDto>>(postDtos,HttpStatus.OK);
 	}
 	
-	
 	@GetMapping("/get/userId/{userId}")
 	ResponseEntity<List<PostDto>> getAllPostByUser(@PathVariable Integer userId)
 	{
 		List<PostDto> postDtos= postService.getPostsByUser(userId);
 		return new ResponseEntity<List<PostDto>>(postDtos,HttpStatus.OK);
 	}
-	
 	
 	@DeleteMapping ("/delete/{postId}")
 	ResponseEntity<String> deletePost(@PathVariable Integer postId)
@@ -72,11 +71,20 @@ public class PostController {
 		return new ResponseEntity<PostDto>(postDto,HttpStatus.OK);
 	}
 	
+//	@GetMapping("/get")
+//	ResponseEntity<List<PostDto>> getAllPost()
+//	{
+//		List<PostDto> postDtos= postService.getAllPost();
+//		return new ResponseEntity<List<PostDto>>(postDtos,HttpStatus.OK);
+//	}
 	
-	@GetMapping("/get")
-	ResponseEntity<List<PostDto>> getAllPost()
-	{
-		List<PostDto> postDtos= postService.getAllPost();
-		return new ResponseEntity<List<PostDto>>(postDtos,HttpStatus.OK);
-	}
+	//To access data in http://localhost:8081/api/post/getAll?pageNumber=1&pageSize=5
+		@GetMapping("/getAll")
+		ResponseEntity<List<PostDto>> getAllPost(
+				@RequestParam(value="pageNumber", defaultValue="1", required=false) Integer pageNumber,
+				@RequestParam(value="pageSize", defaultValue="3", required=false) Integer pageSize)
+		{
+			List<PostDto> postDtos= postService.getAllPost(pageNumber, pageSize);
+			return new ResponseEntity<List<PostDto>>(postDtos,HttpStatus.OK);
+		}
 }
