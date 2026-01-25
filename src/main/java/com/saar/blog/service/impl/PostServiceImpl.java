@@ -16,6 +16,7 @@ import com.saar.blog.entities.Post;
 import com.saar.blog.entities.User;
 import com.saar.blog.exceptions.ResourceNotFoundException;
 import com.saar.blog.payloads.PostDto;
+import com.saar.blog.payloads.PostResponse;
 import com.saar.blog.repositories.CategoryRepo;
 import com.saar.blog.repositories.PostRepo;
 import com.saar.blog.repositories.UserRepo;
@@ -75,13 +76,20 @@ public class PostServiceImpl implements PostService {
 	
 	// this is code with pagination
 		@Override
-		public List<PostDto> getAllPost(Integer pageNumber, Integer pageSize) {
+		public PostResponse getAllPost(Integer pageNumber, Integer pageSize) {
 			
 			Pageable p = PageRequest.of(pageNumber, pageSize);
 			Page<Post> pagePost=this.postRepo.findAll(p);
 			List<Post> posts=pagePost.getContent();
 			List<PostDto>postDtos=posts.stream().map(post->this.modelMapper.map(post, PostDto.class)).collect(Collectors.toList());
-			return postDtos;
+			PostResponse postResponse=new PostResponse();
+			postResponse.setContent(postDtos);
+			postResponse.setPageNumber(pagePost.getNumber());
+			postResponse.setPageSize(pagePost.getSize());
+			postResponse.setTotalElements(pagePost.getTotalElements());
+			postResponse.setTotalPages(pagePost.getTotalPages());
+			postResponse.setLastPage(pagePost.isLast());
+			return postResponse;
 		}
 	
 	@Override
