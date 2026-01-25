@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -76,9 +77,17 @@ public class PostServiceImpl implements PostService {
 	
 	// this is code with pagination
 		@Override
-		public PostResponse getAllPost(Integer pageNumber, Integer pageSize) {
+		public PostResponse getAllPost(Integer pageNumber, Integer pageSize,String sortBy,String sortDir) {
 			
-			Pageable p = PageRequest.of(pageNumber, pageSize);
+			Sort sort=null;
+			if(sortDir.equalsIgnoreCase("asc") )
+			{
+				sort=sort.by(sortBy).ascending();
+			}
+			else {
+				sort=sort.by(sortBy).descending();
+			}
+			Pageable p = PageRequest.of(pageNumber, pageSize, sort);
 			Page<Post> pagePost=this.postRepo.findAll(p);
 			List<Post> posts=pagePost.getContent();
 			List<PostDto>postDtos=posts.stream().map(post->this.modelMapper.map(post, PostDto.class)).collect(Collectors.toList());

@@ -79,13 +79,17 @@ public class PostController {
 //		return new ResponseEntity<List<PostDto>>(postDtos,HttpStatus.OK);
 //	}
 	
-	//To access data in http://localhost:8081/api/post/getAll?pageNumber=1&pageSize=5
+//==============Adding Pagination and sorting  if value not came through postman then he will take by default
+//To access data in http://localhost:8081/api/post/getAll?pageNumber=1&pageSize=5
+//	http://localhost:8081/api/post/getAll?pageNumber=0&pageSize=10&sortBy=title&sortDir=asc
 		@GetMapping("/getAll")
 		ResponseEntity<PostResponse> getAllPost(
 				@RequestParam(value="pageNumber", defaultValue="0", required=false) Integer pageNumber,
-				@RequestParam(value="pageSize", defaultValue="5", required=false) Integer pageSize)
+				@RequestParam(value="pageSize", defaultValue="5", required=false) Integer pageSize,
+				@RequestParam(value="sortBy", defaultValue="postId", required=false) String sortBy,
+				@RequestParam(value="sortDir", defaultValue="asc", required=false) String sortDir)
 		{
-			PostResponse postResponse= postService.getAllPost(pageNumber, pageSize);
+			PostResponse postResponse= postService.getAllPost(pageNumber, pageSize,sortBy,sortDir);
 			return new ResponseEntity<PostResponse>(postResponse,HttpStatus.OK);
 		}
 }
