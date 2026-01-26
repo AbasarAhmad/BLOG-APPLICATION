@@ -1,8 +1,10 @@
 package com.saar.blog.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.saar.blog.config.AppConstants;
 import com.saar.blog.payloads.PostDto;
 import com.saar.blog.payloads.PostResponse;
+import com.saar.blog.service.FileService;
 import com.saar.blog.service.PostService;
 
 @RestController
@@ -27,6 +31,11 @@ public class PostController {
 	@Autowired
 	private PostService postService;
 	
+	@Autowired
+	private FileService fileService;
+	
+	@Value("${project.image}")
+	private String path; // place where photos will store
 	
 	@PostMapping("/add/userId/{userId}/categoryId/{categoryId}")
 	ResponseEntity<PostDto> addPost(@RequestBody PostDto postDto, @PathVariable Integer userId,@PathVariable Integer categoryId)
@@ -99,4 +108,16 @@ public class PostController {
 			List<PostDto> allPosts= postService.searchPosts(keywords);
 			return new ResponseEntity<List<PostDto>>(allPosts,HttpStatus.OK);
 		}
+		
+		//post images upload
+	 @PostMapping("/image/upload/{postId}")
+	 public ResponseEntity<PostDto> uploadPostImage(@RequestParam("image") MultipartFile image, @PathVariable Integer postId) throws IOException
+	 
+	 {
+		PostDto postDto=this.postService.getPostById(postId);
+		String fileName=this.fileService.uploadImage(path, image);
+		postDto.setImageName(fileName);
+		PostDto updatePost= this.postService.updatePost(postDto, postId);
+		return new ResponseEntity<PostDto>(updatePost,HttpStatus.OK);
+	 }
 }
