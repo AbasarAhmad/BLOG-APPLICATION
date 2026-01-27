@@ -127,6 +127,7 @@ public class PostController {
 	 }
 	 
 	// method to Get an image in browser through url
+//	 http://localhost:8081/api/post/image/cf876f11-586b-4bdb-9732-7f0eec4efead.png -> print image into browser
 		@GetMapping(value="/image/{imageName}",produces=MediaType.IMAGE_JPEG_VALUE) 
 		public void downloadImage(@PathVariable("imageName") String imageName, HttpServletResponse response) throws IOException{
 			InputStream resource = this.fileService.getResource(path, imageName);
