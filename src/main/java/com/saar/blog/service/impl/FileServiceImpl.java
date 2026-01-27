@@ -51,6 +51,17 @@ public class FileServiceImpl implements FileService {
 		return fileName1;//अंत में, फाइल का यूनिक नाम (fileName1) वापस किया जाता है।
 	}
 
-	
+	@Override
+	public InputStream getResource(String path, String fileName) throws FileNotFoundException {
+		//path + File.separator + fileName से फाइल का पूरा पाथ तैयार होता है।
+//		उदाहरण: C:/images/12345-abc.png
+		String fullPath=path+File.separator+fileName;
+		//new FileInputStream(fullPath) से फाइल को पढ़ने के लिए एक स्ट्रीम बनाई जाती है।
+		InputStream is=new FileInputStream(fullPath);
+		
+		// db logic to return inputstream
+		
+		return is;
+	}
 
 }
