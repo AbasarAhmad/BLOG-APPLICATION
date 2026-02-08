@@ -5,15 +5,20 @@ import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.saar.blog.sercurity.CustomUserDetailService;
+import com.saar.blog.sercurity.JwtAuthenticationEntryPoint;
+import com.saar.blog.sercurity.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -22,9 +27,15 @@ public class SecurityConfig {
 	@Autowired
 	private CustomUserDetailService customUserDetailService;
 	
+	@Autowired
+	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	
+	@Autowired
+	private JwtAuthenticationFilter jwtAuthenticationFilter;
     // This method defines the security filter chain for the application.
     // It replaces the older WebSecurityConfigurerAdapter approach.
+	
+	/*
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -50,7 +61,51 @@ public class SecurityConfig {
         // Builds and returns the configured SecurityFilterChain.
         return http.build();
     }
+    */
     
+
+	
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+	    http
+	        // Disable CSRF (JWT is stateless)
+	        .csrf(csrf -> csrf.disable())
+	        
+	        // Authorization rules
+	        .authorizeHttpRequests(auth -> auth
+	            // Public auth APIs (login/register)
+	            .requestMatchers("/api/v1/auth/**").permitAll()
+
+	            // Allow all GET requests
+	            .requestMatchers(HttpMethod.GET, "/**").permitAll()
+
+	            // Secure remaining requests
+	            .anyRequest().authenticated()
+	        )
+
+	        // Handle unauthorized access
+	        .exceptionHandling(ex -> ex
+	            .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+	        )
+
+	        // Disable session creation
+	        .sessionManagement(session -> session
+	            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+	        );
+
+	    // Add JWT filter before login filter
+	    http.addFilterBefore(
+	        jwtAuthenticationFilter,
+	        UsernamePasswordAuthenticationFilter.class
+	    );
+
+	    // Build security chain
+	    return http.build();
+	}
+
+	
+	
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
 

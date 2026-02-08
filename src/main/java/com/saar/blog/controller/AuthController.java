@@ -1,0 +1,78 @@
+package com.saar.blog.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.saar.blog.payloads.JwtAuthRequest;
+import com.saar.blog.payloads.JwtAuthResponse;
+import com.saar.blog.payloads.UserDto;
+import com.saar.blog.sercurity.JwtTokenHelper;
+import com.saar.blog.service.UserService;
+
+@RestController
+@RequestMapping("/api/v1/auth")
+public class AuthController {
+	@Autowired
+	private JwtTokenHelper jwtTokenHelper;
+	
+	@Autowired
+	private UserDetailsService userDetailsService;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private UserService userService;
+	
+	@PostMapping("/login")
+	public ResponseEntity<JwtAuthResponse> createToken(@RequestBody JwtAuthRequest request) throws Exception
+	{
+		this.authenticate(request.getUsername(),request.getPassword());
+		UserDetails userDetails=this.userDetailsService.loadUserByUsername(request.getUsername());
+				String token=this.jwtTokenHelper.generateToken(userDetails);
+				JwtAuthResponse response=new JwtAuthResponse();
+				response.setToken(token);
+				return new ResponseEntity<JwtAuthResponse>(response, HttpStatus.OK);
+				 
+	}
+
+	
+	// This method checks whether the username and password are correct
+	private void authenticate(String username, String password) throws Exception {
+
+	    // Create an authentication object using username and password
+	    // Spring Security uses this object to perform login
+	    UsernamePasswordAuthenticationToken authenticationToken =
+	            new UsernamePasswordAuthenticationToken(username, password);
+
+	    try {
+	        // Ask Spring Security to authenticate the user
+	        // It will:
+	        // 1. Load user from database
+	        // 2. Match password using BCrypt
+	        // 3. Throw exception if credentials are wrong
+	        this.authenticationManager.authenticate(authenticationToken);
+	    }
+	    catch (BadCredentialsException e) {
+
+	        // This block runs when username or password is incorrect
+	        System.out.println("\nInvalid password or username\n");
+
+	        // Throw a generic exception back to the controller
+	        // Controller will return error response to client
+	        throw new Exception("Invalid username or password");
+	    }
+	}
+
+	}
+
