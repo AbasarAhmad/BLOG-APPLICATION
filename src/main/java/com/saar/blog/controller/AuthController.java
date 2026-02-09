@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.saar.blog.exceptions.ApiException;
 import com.saar.blog.payloads.JwtAuthRequest;
 import com.saar.blog.payloads.JwtAuthResponse;
 import com.saar.blog.payloads.UserDto;
@@ -70,7 +71,7 @@ public class AuthController {
 
 	        // Throw a generic exception back to the controller
 	        // Controller will return error response to client
-	        throw new Exception("Invalid username or password");
+	        throw new ApiException("Invalid username or password");
 	    }
 	}
 

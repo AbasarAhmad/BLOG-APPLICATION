@@ -55,5 +55,12 @@ public class GlobalExceptionHandler {
 	वह Error Message जो क्लाइंट को समझाने के लिए उपयोगी है। उदाहरण: "Name cannot be blank"।
 */
 	
+	@ExceptionHandler(ApiException.class)
+	public ResponseEntity<ApiResponse> handlerApiException(ApiException ex)
+	{
+		String msg=ex.getMessage();
+		ApiResponse apiResponse=new ApiResponse(msg,true);
+		return new ResponseEntity<ApiResponse>(apiResponse,HttpStatus.BAD_REQUEST);
+	}
 	
 }
