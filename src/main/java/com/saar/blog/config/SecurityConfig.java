@@ -1,7 +1,5 @@
 package com.saar.blog.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -20,8 +19,9 @@ import com.saar.blog.sercurity.CustomUserDetailService;
 import com.saar.blog.sercurity.JwtAuthenticationEntryPoint;
 import com.saar.blog.sercurity.JwtAuthenticationFilter;
 
-@Configuration
-@EnableWebSecurity
+@Configuration      // Marks this class as a configuration class for Spring.
+@EnableWebSecurity  // Enables Spring Security (authentication and authorization).
+@EnableMethodSecurity // Enables method-level security like @PreAuthorize and role checks.
 public class SecurityConfig {
 
 	@Autowired

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +53,10 @@ public class UserController {
 		List<UserDto>list= userService.getAllUser();
 		return new ResponseEntity<List<UserDto>>(list,HttpStatus.CREATED);
 	}
+	
+	// ADMIN - only can delete
 	@DeleteMapping("/delete/{userId}")
+	@PreAuthorize("hasAuthority('ADMIN')")  // Allows access only if the logged-in user has ADMIN authority.
 	public ResponseEntity<ApiResponse> deleteUser(@PathVariable  Integer userId) {
 		userService.deleteUser(userId);
 		return new ResponseEntity<ApiResponse>(new ApiResponse("User is deleted !!!", true),HttpStatus.OK);
