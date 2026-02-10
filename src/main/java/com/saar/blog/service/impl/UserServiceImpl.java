@@ -1,15 +1,20 @@
 package com.saar.blog.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.saar.blog.config.AppConstants;
+import com.saar.blog.entities.Role;
 import com.saar.blog.entities.User;
 import com.saar.blog.exceptions.ResourceNotFoundException;
 import com.saar.blog.payloads.UserDto;
+import com.saar.blog.repositories.RoleRepo;
 import com.saar.blog.repositories.UserRepo;
 import com.saar.blog.service.UserService;
 @Service
@@ -19,7 +24,13 @@ public class UserServiceImpl implements UserService{
 	private	UserRepo userRepo;
 	
 	@Autowired
-	private ModelMapper modelMapper;
+	private ModelMapper modelMapper; // This is use for converting User to UserDto and vice versa
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	private RoleRepo roleRepo;
 	
 	@Override
 	public UserDto addUser(UserDto userDto) {
@@ -67,6 +78,24 @@ public class UserServiceImpl implements UserService{
 		User user=this.userRepo.findById(userId).orElseThrow(()->new ResourceNotFoundException("User","Id",userId));
 		this.userRepo.delete(user);
 
+	}
+	
+	@Override
+	public UserDto registerNewUser(UserDto userDto) {
+		User user=this.modelMapper.map(userDto, User.class);
+		
+		//encoded the password
+		user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+		 if (user.getRoles() == null) {
+		        user.setRoles(new HashSet<>());
+		    }
+		// roles
+		Role role= this.roleRepo.findById(AppConstants.ADMIN_USER).orElseThrow(()->new ResourceNotFoundException("Role","Id",AppConstants.NORMAL_USER));
+		
+		
+		user.getRoles().add(role);
+		User newUser=this.userRepo.save(user);
+		return this.modelMapper.map(newUser, UserDto.class);
 	}
 	
 	// Converting Dto to User
