@@ -1,0 +1,224 @@
+BLOG APPLICATION – COMPLETE PROJECT EXPLANATION
+1. Project Overview
+	This project is a RESTful Blog Application backend developed using Spring Boot.
+	It provides secure APIs for managing users, posts, categories, comments, and images.
+
+  Key Features:
+	User registration and login using JWT authentication
+	Role-based authorization (ADMIN / NORMAL user)
+	CRUD operations for Users, Posts, Categories, and Comments
+	Pagination, sorting, and search functionality
+	Image upload and download support
+	Centralized exception handling
+	Stateless and secure architecture
+
+2. Technologies Used
+	Backend & Core Framework
+	Java
+	Spring Boot – Rapid application development and auto-configuration
+	Spring Modules
+	Spring Web – REST API development
+	Spring Data JPA – ORM and database interaction
+	Spring Security – Authentication and authorization
+	JWT (JSON Web Token) – Stateless security
+	Jakarta Validation – Request validation
+
+  Database
+	MySQL – Relational database
+
+  Utilities & Tools
+	Hibernate – JPA implementation
+	ModelMapper – Entity to DTO conversion
+	Lombok – Boilerplate code reduction
+	BCrypt Password Encoder – Secure password hashing
+
+3. Application Architecture
+
+		Controller Layer
+			   ↓
+		Service Interface
+		  	 ↓
+		Service Implementation
+		   	↓
+		Repository (JPA)
+		   ↓
+		Database
+
+ Benefits:
+	Loose coupling
+	Easy maintenance
+	Better scalability
+	Clean separation of responsibilities
+
+4. Entity and Database Design
+	Core Entities:
+ User
+	Fields: id, name, email, password, about
+	Implements UserDetails for Spring Security
+	Relationships:
+	One User → Many Posts
+	Many Users ↔ Many Roles
+
+ Role
+	Fields: id, name
+	Used for authorization (ADMIN, NORMAL)
+
+ Category
+	Fields: title, description
+	One Category → Many Posts
+
+ Post
+	Fields: title, content, imageName, addedDate
+	Relationships:
+	Many Posts → One User
+	Many Posts → One Category
+	One Post → Many Comments
+
+ Comment
+	Fields: content
+	Many Comments → One Post
+	All relationships are mapped using JPA annotations.
+
+5. DTO (Data Transfer Object) Layer
+ Why DTOs?
+	Prevent direct exposure of entities
+	Avoid security issues (e.g., password leakage)
+	Prevent circular reference problems
+	Keep API responses clean and controlled
+
+Examples:   UserDto,PostDto,CategoryDto,CommentDto, PostResponse (for pagination)
+
+6. Authentication Flow (JWT Based)
+	Login API
+	POST /api/v1/auth/login
+  Flow:
+	User sends email and password
+	AuthenticationManager authenticates the user
+	CustomUserDetailService loads user from the database
+	Password is verified using BCrypt
+	JWT token is generated
+	Token is returned to the client
+
+7. JWT Token Working
+    Token Contains:
+	Subject (user email)
+	Issue time
+	Expiration time
+	Signed using HS512 algorithm
+
+    Why JWT?
+	Stateless authentication : Stateless authentication means the server doesn’t store session info; the token itself carries everything 						needed for authentication.
+	No server-side session storage
+	Scalable and secure
+
+8. Request Authorization Flow
+   For protected APIs:
+	Client sends request with header:
+	Authorization: Bearer <JWT_TOKEN>
+	JwtAuthenticationFilter:
+	Extracts token
+	Retrieves username
+	Loads user details
+	Validates token
+	Authentication is set in SecurityContextHolder
+	Request is allowed to access controller
+	❌ Invalid or missing token → 401 Unauthorized
+
+9. Role-Based Authorization
+	Roles are stored in the database
+	User roles are converted to authorities
+	Method-level security using annotations
+
+Example:  @PreAuthorize("hasAuthority('ADMIN')")
+	Only ADMIN users can delete users.
+
+10. Security Configuration Summary
+	CSRF disabled (JWT-based REST API)
+	Stateless session management
+  Public APIs:
+	/api/v1/auth/**
+  All GET requests
+	Secured APIs:
+	POST / PUT / DELETE requests
+	JWT filter added before Spring Security authentication filter
+
+11. Pagination and Sorting
+	GET /api/post/getAll?pageNumber=0&pageSize=10&sortBy=title&sortDir=asc
+
+
+12. Image Upload and Download
+	Image stored on server file system
+	Unique filename generated using UUID
+	Filename saved in database
+
+Download Image
+	GET /api/post/image/{imageName}
+	Image streamed directly to browser
+
+13. Search Functionality
+	GET /api/post/getPostBy/{keyword}
+  Uses Spring Data JPA method:
+	findByTitleContaining()
+	Supports partial and case-insensitive search
+
+14. Validation Handling
+  Validation annotations:
+	@NotBlank
+	@Size
+	@Email
+
+15. Global Exception Handling
+	Implemented using @ControllerAdvice
+  Handles:
+	ResourceNotFoundException → 404
+	Validation errors → 400
+	ApiException → 400
+	Unauthorized access → 401
+	Ensures consistent and clean API responses.
+
+17. Project Strengths
+
+	Industry-standard layered architecture
+	Secure JWT-based authentication
+	Role-based authorization
+	Clean DTO-based API design
+	Pagination, sorting, and search support
+	File upload and download handling
+	Centralized exception management
+	Production-ready and interview-ready
+
+18. Interview Summary (One Line)
+
+“I developed a secure RESTful Blog Application using Spring Boot, Spring Security, JWT, and JPA with role-based authorization, pagination, search, image upload, and centralized exception handling following industry best practices.”
+
+
+
+
+
+JWT vs Role-Based – Clear Difference
+		Aspect	  			JWT Authentication			Role-Based Authorization
+		Purpose	  			Identify the user			Control access
+		Question answered		Who are you?				What can you do?
+		Used for			Login & identity			Permission check
+		Stateless			Yes					Works on top of authentication
+		Example				Valid JWT token				ADMIN vs NORMAL
+
+How both work together in Blog project
+Step-by-step flow
+
+Login
+	User logs in
+	JWT token generated
+
+Request
+	Client sends JWT token
+Authentication
+	JWT filter validates token
+	User is authenticated
+
+Authorization
+	Role is checked (ADMIN / NORMAL)
+	Access granted or denied
+
+👉 JWT        =     Authentication
+👉 Role-based =     Authorization
